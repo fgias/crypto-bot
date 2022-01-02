@@ -16,7 +16,7 @@ import pandas_ta as pta
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 
 
-class BBandsRSI(IStrategy):
+class MAC(IStrategy):
     """
     This is a strategy template to get you started.
     More information in https://www.freqtrade.io/en/latest/strategy-customization/
@@ -38,12 +38,12 @@ class BBandsRSI(IStrategy):
     INTERFACE_VERSION = 2
 
     # Optimal timeframe for the strategy.
-    timeframe = '5m'
+    timeframe = '1m'
 
     # Minimal ROI designed for the strategy.
-    # This attribute will be overridden if the config file contains "minimal_roi".
+    # # This attribute will be overridden if the config file contains "minimal_roi".
     minimal_roi = {
-        "0": 0.0
+        "0": 10
     }
 
     # Optimal stoploss designed for the strategy.
@@ -65,7 +65,7 @@ class BBandsRSI(IStrategy):
     ignore_roi_if_buy_signal = False
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 30
+    startup_candle_count: int = 50
 
     # Strategy parameters
     buy_rsi = IntParameter(10, 40, default=30, space="buy")
@@ -90,55 +90,54 @@ class BBandsRSI(IStrategy):
         return {
             # Main plot indicators (Moving averages, ...)
             'main_plot': {
-                'bb_upperband': {'color': 'grey'},
-                'bb_middleband': {'color': 'red'},
-                'bb_lowerband': {'color': 'grey'}
+                'ema50': {'color': 'blue'},
+                'ema200': {'color': 'orange'},
             },
             'subplots': {
                 # Subplots - each dict defines one additional plot
-                "RSI": {
-                    'rsi': {'color': 'blue'},
-                    'overbought': {'color': 'red'},
-                    'oversold': {'color': 'green'}
-                }
             }
         }
 
-    def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+    def informative_pairs(self):
         """
-        Adds several different TA indicators to the given DataFrame
+        Define additional, informative pair/interval combinations to be cached from the exchange.
+        These pair/interval combinations are non-tradeable, unless they are part
+        of the whitelist as well.
+        For more information, please consult the documentation
+        :return: List of tuples in the format (pair, interval)
+            Sample: return [("ETH/USDT", "5m"),
+                            ("BTC/USDT", "15m"),
+                            ]
+        """
+        return []
 
-        Performance Note: For the best performance be frugal on the number of indicators
-        you are using. Let uncomment only the indicator you are using in your strategies
-        or your hyperopt configuration, otherwise you will waste your memory and CPU usage.
-        :param dataframe: Dataframe with data from the exchange
-        :param metadata: Additional information, like the currently traded pair
-        :return: a Dataframe with all mandatory indicators for the strategies
-        """
-        
-        # Momentum Indicators
-        # ------------------------------------
+    def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
 
         # RSI
         dataframe['rsi'] = ta.RSI(dataframe)
-        dataframe['overbought'] = 70
-        dataframe['oversold'] = 30
 
-        # Overlap Studies
-        # ------------------------------------
+        # MACD
+        macd = ta.MACD(dataframe)
+        dataframe['macd'] = macd['macd']
+        dataframe['macdsignal'] = macd['macdsignal']
+        dataframe['macdhist'] = macd['macdhist']
 
-        # Bollinger Bands
-        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
-        dataframe['bb_lowerband'] = bollinger['lower']
-        dataframe['bb_middleband'] = bollinger['mid']
-        dataframe['bb_upperband'] = bollinger['upper']
-        dataframe["bb_percent"] = (
-            (dataframe["close"] - dataframe["bb_lowerband"]) /
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
-        )
-        dataframe["bb_width"] = (
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"]
-        )
+        # # EMA - Exponential Moving Average
+        # dataframe['ema3'] = ta.EMA(dataframe, timeperiod=3)
+        # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
+        # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
+        # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
+        dataframe['ema200'] = ta.EMA(dataframe, timeperiod=200)
+
+        # # SMA - Simple Moving Average
+        # dataframe['sma3'] = ta.SMA(dataframe, timeperiod=3)
+        # dataframe['sma5'] = ta.SMA(dataframe, timeperiod=5)
+        # dataframe['sma10'] = ta.SMA(dataframe, timeperiod=10)
+        # dataframe['sma21'] = ta.SMA(dataframe, timeperiod=21)
+        # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
+        # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
         return dataframe
 
@@ -151,8 +150,9 @@ class BBandsRSI(IStrategy):
         """
         dataframe.loc[
             (
-                (dataframe['rsi'] < 30) &
-                (dataframe['close'] < dataframe['bb_lowerband']) &
+                # (dataframe['rsi'] < 30) &  
+                (dataframe['ema50'] > dataframe['ema200']) &  
+                (dataframe['ema50'].shift() < dataframe['ema200'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'buy'] = 1
@@ -168,7 +168,9 @@ class BBandsRSI(IStrategy):
         """
         dataframe.loc[
             (
-                (dataframe['rsi'] > 70) &
+                # (dataframe['rsi'] > 70) &
+                (dataframe['ema50'] < dataframe['ema200']) &  
+                (dataframe['ema50'].shift() > dataframe['ema200'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'sell'] = 1

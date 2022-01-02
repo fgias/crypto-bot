@@ -15,8 +15,10 @@ import talib.abstract as ta
 import pandas_ta as pta
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 
+import pandas_ta as pd_ta
 
-class BBandsRSI(IStrategy):
+
+class SuperTrend(IStrategy):
     """
     This is a strategy template to get you started.
     More information in https://www.freqtrade.io/en/latest/strategy-customization/
@@ -38,12 +40,12 @@ class BBandsRSI(IStrategy):
     INTERFACE_VERSION = 2
 
     # Optimal timeframe for the strategy.
-    timeframe = '5m'
+    timeframe = '30m'
 
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
     minimal_roi = {
-        "0": 0.0
+        "0": 0.2
     }
 
     # Optimal stoploss designed for the strategy.
@@ -90,69 +92,27 @@ class BBandsRSI(IStrategy):
         return {
             # Main plot indicators (Moving averages, ...)
             'main_plot': {
-                'bb_upperband': {'color': 'grey'},
-                'bb_middleband': {'color': 'red'},
-                'bb_lowerband': {'color': 'grey'}
-            },
-            'subplots': {
-                # Subplots - each dict defines one additional plot
-                "RSI": {
-                    'rsi': {'color': 'blue'},
-                    'overbought': {'color': 'red'},
-                    'oversold': {'color': 'green'}
-                }
+                'ST_long': {'color': 'green'},
+                'ST_short': {'color': 'red'}
             }
         }
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """
-        Adds several different TA indicators to the given DataFrame
 
-        Performance Note: For the best performance be frugal on the number of indicators
-        you are using. Let uncomment only the indicator you are using in your strategies
-        or your hyperopt configuration, otherwise you will waste your memory and CPU usage.
-        :param dataframe: Dataframe with data from the exchange
-        :param metadata: Additional information, like the currently traded pair
-        :return: a Dataframe with all mandatory indicators for the strategies
-        """
-        
-        # Momentum Indicators
-        # ------------------------------------
+        period = 7
+        atr_mult = 3.0
 
-        # RSI
-        dataframe['rsi'] = ta.RSI(dataframe)
-        dataframe['overbought'] = 70
-        dataframe['oversold'] = 30
-
-        # Overlap Studies
-        # ------------------------------------
-
-        # Bollinger Bands
-        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
-        dataframe['bb_lowerband'] = bollinger['lower']
-        dataframe['bb_middleband'] = bollinger['mid']
-        dataframe['bb_upperband'] = bollinger['upper']
-        dataframe["bb_percent"] = (
-            (dataframe["close"] - dataframe["bb_lowerband"]) /
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
-        )
-        dataframe["bb_width"] = (
-            (dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"]
-        )
+        dataframe['ST_long'] = pd_ta.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=period, multiplier=atr_mult)[f'SUPERTl_{period}_{atr_mult}']
+        dataframe['ST_short'] = pd_ta.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=period, multiplier=atr_mult)[f'SUPERTs_{period}_{atr_mult}']
 
         return dataframe
 
     def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """
-        Based on TA indicators, populates the buy signal for the given dataframe
-        :param dataframe: DataFrame populated with indicators
-        :param metadata: Additional information, like the currently traded pair
-        :return: DataFrame with buy column
-        """
+        
         dataframe.loc[
             (
-                (dataframe['rsi'] < 30) &
-                (dataframe['close'] < dataframe['bb_lowerband']) &
+                (dataframe['ST_long'] < dataframe['close']) &
+                # (dataframe['ST_long'].shift() > dataframe['close'].shift()) &
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'buy'] = 1
@@ -160,15 +120,11 @@ class BBandsRSI(IStrategy):
         return dataframe
 
     def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """
-        Based on TA indicators, populates the sell signal for the given dataframe
-        :param dataframe: DataFrame populated with indicators
-        :param metadata: Additional information, like the currently traded pair
-        :return: DataFrame with buy column
-        """
+
         dataframe.loc[
             (
-                (dataframe['rsi'] > 70) &
+                (dataframe['ST_short'] > dataframe['close']) &
+                # (dataframe['ST_short'].shift() < dataframe['close'].shift()) &
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'sell'] = 1
