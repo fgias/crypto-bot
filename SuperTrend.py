@@ -40,17 +40,19 @@ class SuperTrend(IStrategy):
     INTERFACE_VERSION = 2
 
     # Optimal timeframe for the strategy.
-    timeframe = '30m'
+    timeframe = '1m'
 
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
     minimal_roi = {
-        "0": 0.2
+        "60": 0.01,
+        "30": 0.02,
+        "0": 0.04
     }
 
     # Optimal stoploss designed for the strategy.
     # This attribute will be overridden if the config file contains "stoploss".
-    stoploss = -0.15
+    stoploss = -0.02
 
     # Trailing stoploss
     trailing_stop = False
@@ -92,8 +94,8 @@ class SuperTrend(IStrategy):
         return {
             # Main plot indicators (Moving averages, ...)
             'main_plot': {
-                'ST_long': {'color': 'green'},
-                'ST_short': {'color': 'red'}
+                'ema12': {'color': 'green'},
+                'ema50': {'color': 'red'}
             }
         }
 
@@ -101,6 +103,33 @@ class SuperTrend(IStrategy):
 
         period = 7
         atr_mult = 3.0
+
+        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
+
+        macd = ta.MACD(dataframe)
+        dataframe['macd'] = macd['macd']
+        dataframe['macdsignal'] = macd['macdsignal']
+        dataframe['macdhist'] = macd['macdhist']
+
+        dataframe['ema12'] = ta.EMA(dataframe, timeperiod=12)
+        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['ema200'] = ta.EMA(dataframe, timeperiod=200)
+
+        dataframe['rsi'] = ta.RSI(dataframe)
+        dataframe['overbought'] = 70
+        dataframe['oversold'] = 30
+
+        bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
+        dataframe['bb_lowerband'] = bollinger['lower']
+        dataframe['bb_middleband'] = bollinger['mid']
+        dataframe['bb_upperband'] = bollinger['upper']
+        dataframe["bb_percent"] = (
+            (dataframe["close"] - dataframe["bb_lowerband"]) /
+            (dataframe["bb_upperband"] - dataframe["bb_lowerband"])
+        )
+        dataframe["bb_width"] = (
+            (dataframe["bb_upperband"] - dataframe["bb_lowerband"]) / dataframe["bb_middleband"]
+        )
 
         dataframe['ST_long'] = pd_ta.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=period, multiplier=atr_mult)[f'SUPERTl_{period}_{atr_mult}']
         dataframe['ST_short'] = pd_ta.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=period, multiplier=atr_mult)[f'SUPERTs_{period}_{atr_mult}']
@@ -111,7 +140,11 @@ class SuperTrend(IStrategy):
         
         dataframe.loc[
             (
-                (dataframe['ST_long'] < dataframe['close']) &
+                # (dataframe['ST_long'] < dataframe['close']) &
+                (dataframe['ema12'] > dataframe['ema50']) & 
+                (dataframe['rsi'] < 30) &
+                (dataframe['close'] < dataframe['bb_lowerband']) &
+
                 # (dataframe['ST_long'].shift() > dataframe['close'].shift()) &
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
@@ -123,9 +156,7 @@ class SuperTrend(IStrategy):
 
         dataframe.loc[
             (
-                (dataframe['ST_short'] > dataframe['close']) &
-                # (dataframe['ST_short'].shift() < dataframe['close'].shift()) &
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
+
             ),
             'sell'] = 1
         return dataframe
