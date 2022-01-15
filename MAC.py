@@ -127,9 +127,9 @@ class MAC(IStrategy):
         # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
         # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
         # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
-        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['ema20'] = ta.EMA(dataframe, timeperiod=20)
         # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
-        dataframe['ema200'] = ta.EMA(dataframe, timeperiod=200)
+        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
 
         # # SMA - Simple Moving Average
         # dataframe['sma3'] = ta.SMA(dataframe, timeperiod=3)
@@ -151,8 +151,8 @@ class MAC(IStrategy):
         dataframe.loc[
             (
                 # (dataframe['rsi'] < 30) &  
-                (dataframe['ema50'] > dataframe['ema200']) &  
-                (dataframe['ema50'].shift() < dataframe['ema200'].shift()) &  
+                (dataframe['ema20'] > dataframe['ema50']) &  
+                (dataframe['ema20'].shift() < dataframe['ema50'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'buy'] = 1
@@ -169,8 +169,8 @@ class MAC(IStrategy):
         dataframe.loc[
             (
                 # (dataframe['rsi'] > 70) &
-                (dataframe['ema50'] < dataframe['ema200']) &  
-                (dataframe['ema50'].shift() > dataframe['ema200'].shift()) &  
+                (dataframe['ema20'] < dataframe['ema50']) &  
+                (dataframe['ema20'].shift() > dataframe['ema50'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'sell'] = 1
