@@ -6,7 +6,7 @@ This is the strategy folder of the Freqtrade bot, https://www.freqtrade.io/en/st
   - The bot does not have the ability to short sell.
   - You can only buy pairs, not perpetual contracts or other instruments. Therefore it is impossible to create market neutral strategies or take advantage of the funding rates etc.
 
-## Deploying to run 24/7 on the AWS cloud
+## Deploying the bot to run 24/7 on the AWS cloud
 - Register on AWS.
 - Create an Linux (Debian) EC2 instance.
 - `ssh` using the key pair .pem file.
