@@ -1,6 +1,8 @@
 # Testing trading strategies with the Freqtrade crypto bot.
 
-This is the strategy folder of the Freqtrade bot, https://www.freqtrade.io/en/stable/.
+This is the strategy folder for the Freqtrade bot.
+
+To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https://www.udemy.com/course/build-a-crypto-bot-100-functional-algorithmic-trading-freqtrade/.
 
 ## Deploying the bot to run 24/7 on the AWS cloud
 - Register on AWS.
