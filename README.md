@@ -2,7 +2,7 @@
 
 This is the strategy folder of the Freqtrade bot, https://www.freqtrade.io/en/stable/.
 
-# Comments/ Limitations
+## Comments/ Limitations
   - The bot does not have the ability to short sell.
   - You can only buy pairs, not perpetual contracts or other instruments. Therefore it is impossible to create market neutral strategies or take advantage of the funding rates etc.
 
