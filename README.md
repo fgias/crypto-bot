@@ -5,7 +5,7 @@ This is the strategy folder of the Freqtrade bot, https://www.freqtrade.io/en/st
 ## Deploying the bot to run 24/7 on the AWS cloud
 - Register on AWS.
 - Create a Linux (Debian) EC2 instance.
-- `ssh` using the key pair .pem file: `ssh -i "KeyPair.pem" admin@****`.
+- In the CMD, `ssh` using the key pair .pem file: `ssh -i "KeyPair.pem" admin@****`.
 - Follow the installation instructions here: https://www.freqtrade.io/en/stable/installation/.
 - Do not forget to check the requirements before setting up.
 - To activate the virtual environment, run the command `source ./.env/bin/activate` in the freqtrade folder.
