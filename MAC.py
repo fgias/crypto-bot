@@ -152,7 +152,7 @@ class MAC(IStrategy):
             (
                 # (dataframe['rsi'] < 30) &  
                 (dataframe['ema20'] > dataframe['ema50']) &  
-                (dataframe['ema20'].shift() < dataframe['ema50'].shift()) &  
+                #(dataframe['ema20'].shift() < dataframe['ema50'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'buy'] = 1
@@ -170,7 +170,7 @@ class MAC(IStrategy):
             (
                 # (dataframe['rsi'] > 70) &
                 (dataframe['ema20'] < dataframe['ema50']) &  
-                (dataframe['ema20'].shift() > dataframe['ema50'].shift()) &  
+                #(dataframe['ema20'].shift() > dataframe['ema50'].shift()) &  
                 (dataframe['volume'] > 0)  # Make sure Volume is not 0
             ),
             'sell'] = 1
