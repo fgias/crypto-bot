@@ -5,7 +5,7 @@ This is the strategy folder for the Freqtrade bot.
 To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https://www.udemy.com/course/build-a-crypto-bot-100-functional-algorithmic-trading-freqtrade/.
 
 ## Deploying the bot to run 24/7 on the AWS cloud
-- Register on AWS.
+- Register on AWS, https://aws.amazon.com/.
 - Create a Linux (Debian) EC2 instance.
 - In the CMD, `ssh` using the key pair .pem file: `ssh -i "KeyPair.pem" admin@****`.
 - Follow the installation instructions here: https://www.freqtrade.io/en/stable/installation/.
