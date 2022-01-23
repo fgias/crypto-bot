@@ -13,6 +13,11 @@ To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https
 - To activate the virtual environment, run the command `source ./.env/bin/activate` in the freqtrade folder.
 - To end the ssh session, but keep the bot running, use the command `screen` and then detach from the running process with the key binding `Ctrl + A Ctrl + D`. To resume the session use `screen -r`. See https://www.tecmint.com/keep-remote-ssh-sessions-running-after-disconnection/.
 
+## config.json file for MAC
+- max open trades: -1 for unlimited (limited by pairlist), or 10
+- stake amount: unlimited
+- blacklist DAI/USDT, USDC/USDT (stable coins)
+
 ## Comments/ Limitations
   - The bot does not have the ability to short sell.
   - You can only buy pairs, not perpetual contracts or other instruments. Therefore it is impossible to create market neutral strategies or take advantage of the funding rates etc.
