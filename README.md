@@ -16,7 +16,7 @@ To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https
 - Connect the freqtrade bot with a telegram bot using the telegram token and your own telegram chat id.
 - To end the ssh session, but keep the bot running, use the command `screen` and then detach from the running process with the key binding `Ctrl + A Ctrl + D`. To resume the session use `screen -r`. See https://www.tecmint.com/keep-remote-ssh-sessions-running-after-disconnection/.
 
-## config.json file for MAC
+## config.json file for MAC strategy
 - max open trades: -1 for unlimited (limited by pairlist), or 10
 - stake amount: unlimited
 - blacklist DAI/USDT, USDC/USDT, BUSD/USDT (stable coins) etc.
