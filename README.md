@@ -12,14 +12,14 @@ To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https
 - Do not forget to check the requirements before setting up.
 - To activate the virtual environment, run the command `source ./.env/bin/activate` in the freqtrade folder.
 - Run `freqtrade new-config` to create new configuration file `config.json`.
-- Generate an API token and a secret key from your exchange (e.g. Kraken, Binance) and use them to connect the bot with the exchange.
+- Generate an API token and a secret key from your exchange (e.g. Binance, Kraken) and use them to connect the bot with the exchange.
 - Connect the freqtrade bot with a telegram bot using the telegram token and your own telegram chat id.
 - To end the ssh session, but keep the bot running, use the command `screen` and then detach from the running process with the key binding `Ctrl + A Ctrl + D`. To resume the session use `screen -r`. See https://www.tecmint.com/keep-remote-ssh-sessions-running-after-disconnection/.
 
 ## config.json file for MAC
 - max open trades: -1 for unlimited (limited by pairlist), or 10
 - stake amount: unlimited
-- blacklist DAI/USDT, USDC/USDT (stable coins)
+- blacklist DAI/USDT, USDC/USDT, BUSD/USDT (stable coins) etc.
 
 ## Comments/ Limitations
   - The bot does not have the ability to short sell.
