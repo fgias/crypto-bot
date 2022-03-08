@@ -19,7 +19,7 @@ To set up, see the https://www.freqtrade.io/en/stable/ or the udemy course https
 ## config.json file for MAC strategy
 - max open trades: 8
 - stake amount: unlimited
-- blacklist DAI/USDT, USDC/USDT, BUSD/USDT etc. (stable coins).
+- blacklist DAI/USDT, USDC/USDT, BUSD/USDT etc. (stable coins)
 - stoploss = -0.15
 
 ## Comments/ Limitations
